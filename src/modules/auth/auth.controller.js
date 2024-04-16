@@ -10,10 +10,10 @@ import { EntityTransformer } from '../../common/transformers/entityTransformer.j
 // Signup route
 export const httpSignUp = catchAsync(async (req, res) => {
   // Extract user data from request body
-  const { username, email, password, isTermsAccepted } = req.body;
+  const { username, email, password } = req.body;
 
   // Validate user data
-  if (!username || !email || !password || !isTermsAccepted) {
+  if (!username || !email || !password) {
     throw new AppError('All fields are required', 400);
   }
 

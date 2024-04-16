@@ -30,11 +30,6 @@ const userSchema = new mongoose.Schema(
         ref: 'FlashCard',
       },
     ],
-    isTermsAccepted: {
-      type: Boolean,
-      required: true,
-      unique: false,
-    },
     lastLogin: {
       type: Date,
       required: true,
