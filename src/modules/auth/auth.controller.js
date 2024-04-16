@@ -10,7 +10,7 @@ import { EntityTransformer } from '../../common/transformers/entityTransformer.j
 // Signup route
 export const httpSignUp = catchAsync(async (req, res) => {
   // Extract user data from request body
-  const { username, email, password, role, isTermsAccepted } = req.body;
+  const { username, email, password, isTermsAccepted } = req.body;
 
   // Validate user data
   if (!username || !email || !password || !isTermsAccepted) {
@@ -28,8 +28,6 @@ export const httpSignUp = catchAsync(async (req, res) => {
     username,
     email,
     password,
-    role: role || 'member',
-    isTermsAccepted,
     lastLogin: new Date()
   });
 
