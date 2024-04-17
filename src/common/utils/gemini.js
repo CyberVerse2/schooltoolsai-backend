@@ -92,7 +92,11 @@ class QuizGenerator {
     ${pdfText}
     `
         const result = await this.model.generateContent(prompt)
-        const response = result.response
+        if (!result || !result.response) {
+            throw new AppError('Failed to generate quiz content from Google AI')
+        }
+
+        const response = await result.response
         console.log(response.text())
         const text = removeBackticks(response.text())?.slice(4) //remove backticks and json
         console.log(text)
