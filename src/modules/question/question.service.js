@@ -1,4 +1,4 @@
-import Question from './question.schema'
+import Question from './question.schema.js'
 
 export async function createQuestion(body) {
     return await Question.create(body)

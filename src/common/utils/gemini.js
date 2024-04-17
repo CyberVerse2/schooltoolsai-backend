@@ -72,12 +72,28 @@ class QuizGenerator {
         }
         const prompt = `you are a helpful assistant created to help students create multiple choice questions based on sample text sent.
     Based on the words here,make it readable and return ${numberOfQuestions} multiple choice questions and their answers in json format preferably.
+    the json format should be like this example:
+    {
+ "questions": [
+  {
+   "question": "Who is the target audience for the NACOS Tech Event?",
+   "answers": [
+    "Computer science students only",
+    "Developers, builders, managers, community leaders, and entrepreneurs",
+    "Newbies in the tech industry",
+    "Students who want to advance their careers in tech"
+   ],
+   "correctAnswer": 1
+  }
+ ]
+}
     Here is the text:
     ${pdfText}
     `
         const result = await this.model.generateContent(prompt)
         const response = result.response
         const text = removeBackticks(response.text()).slice(4) //remove backticks and json
+        console.log(text)
         return {
             title: pdfTitle === 'No Title Found' ? filename : pdfTitle,
             questions: JSON.parse(text)?.questions,

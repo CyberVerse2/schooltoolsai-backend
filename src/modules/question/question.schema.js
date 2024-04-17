@@ -6,13 +6,17 @@ const questionSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Quiz',
         },
+        question: {
+            type: String,
+            required: true,
+        },
         answers: [
             {
                 type: String,
                 required: true,
             },
         ],
-        correctAnswer: Number,
+        correctAnswer: String,
     },
     { timestamps: true }
 )

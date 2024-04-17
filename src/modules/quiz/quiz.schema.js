@@ -1,21 +1,21 @@
 import mongoose from 'mongoose'
 
 const quizSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    count: String,
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        count: String,
 
-    questions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Question',
-      },
-    ],
-  },
-  { timestamps: true }
+        questions: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Question',
+            },
+        ],
+    },
+    { timestamps: true }
 )
 
 const Quiz = mongoose.model('Quiz', quizSchema)
