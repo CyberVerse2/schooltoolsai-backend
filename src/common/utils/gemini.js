@@ -92,7 +92,6 @@ class QuizGenerator {
     `
         const result = await this.model.generateContent(prompt)
         const response = result.response
-        console.log(response.text())
         const text = removeBackticks(response.text())?.slice(4) //remove backticks and json
         console.log(text)
         return {
