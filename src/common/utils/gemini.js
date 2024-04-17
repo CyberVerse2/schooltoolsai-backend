@@ -39,7 +39,24 @@ async function extractPDFTitleFromBuffer(buffer) {
         throw error // Re-throw for handling in the calling code
     }
 }
+function removeBackticks(text) {
+    if (!text) {
+        return text // Handle empty string case
+    }
 
+    const trimmedText = text.trim() // Remove leading/trailing whitespace
+
+    // Check if the trimmed string starts with "json" followed by a space
+    if (trimmedText.startsWith('json ')) {
+        // Remove "json " (adjust based on your actual pattern)
+        return trimmedText.slice(5)
+    } else if (trimmedText.startsWith('`') && trimmedText.endsWith('`')) {
+        // Handle string starting/ending with backticks only (as before)
+        return trimmedText.slice(3, -3)
+    } else {
+        return text
+    }
+}
 class QuizGenerator {
     constructor() {
         this.geminiApiKey = ENVIRONMENT.GEMINI.API_KEY
@@ -47,7 +64,7 @@ class QuizGenerator {
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' })
     }
 
-    async generateQuiz(numberOfQuestions, buffer) {
+    async generateQuiz(numberOfQuestions, filename, buffer) {
         const pdfTitle = await extractPDFTitleFromBuffer(buffer)
         const pdfText = await extractTextFromPDF(buffer)
         if (!pdfText) {
@@ -60,9 +77,9 @@ class QuizGenerator {
     `
         const result = await this.model.generateContent(prompt)
         const response = result.response
-        const text = response.text()
+        const text = removeBackticks(response.text()).slice(4) //remove backticks and json
         return {
-            title: pdfTitle,
+            title: pdfTitle === 'No Title Found' ? filename : pdfTitle,
             questions: JSON.parse(text)?.questions,
         }
     }
