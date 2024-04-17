@@ -1,119 +1,70 @@
-import { Configuration, Client } from "@anthropic-ai/sdk"
-import { getDocument } from 'pdfjs-dist'
+import pdf from 'pdf-lib'
+import axios from 'axios'
 
-class Claude3Model {
-    constructor() {
-        const configuration = new Configuration({
-            apiKey: 'your_anthropic_api_key_here',
-        })
-        this.client = new Client(configuration)
-        this.BATCH_SIZE = 5 // Number of paragraphs to process per batch
+class MCQGenerator {
+    constructor(openaiApiKey) {
+        this.openaiApiKey = openaiApiKey
     }
 
-    async generateFlashcards(
-        pdfBuffer,
-        pageRange = { start: 1, end: 0 },
-        numFlashcardsPerParagraph = 3,
-        topicCategories = []
-    ) {
-        const flashcards = []
-
-        // Load the PDF document
-        const doc = await getDocument(pdfBuffer).promise
-
-        // Extract text from the PDF, considering the specified page range
-        const text = await this.extractPdfText(doc, pageRange)
-
-        // Process the text in batches
-        for (let i = 0; i < text.length; i += this.BATCH_SIZE) {
-            const batch = text.slice(i, i + this.BATCH_SIZE)
-            const batchFlashcards = await this.generateFlashcardsForBatch(
-                batch,
-                numFlashcardsPerParagraph,
-                topicCategories
-            )
-            flashcards.push(...batchFlashcards)
+    async extractTextFromPDF(pdfData) {
+        const pdfDoc = await pdf.Document.load(pdfData)
+        const pages = pdfDoc.getPages()
+        let text = ''
+        for (const page of pages) {
+            text += await page.getTextContent()
         }
-
-        return flashcards
-    }
-
-    async generateFlashcardsForBatch(
-        batch,
-        numFlashcardsPerParagraph,
-        topicCategories
-    ) {
-        const flashcards = []
-
-        for (const paragraph of batch) {
-            try {
-                const response = await this.client.completion({
-                    prompt: `
-Please generate ${numFlashcardsPerParagraph} high-quality flashcards based on the following text:
-
-${paragraph}
-
-Flashcard 1:
-Question:
-Answer:
-Topic: ${topicCategories.length > 0 ? topicCategories.join(', ') : 'General'}
-
-Flashcard 2:
-Question:
-Answer: 
-Topic: ${topicCategories.length > 0 ? topicCategories.join(', ') : 'General'}
-
-Flashcard 3:
-Question:
-Answer:
-Topic: ${topicCategories.length > 0 ? topicCategories.join(', ') : 'General'}
-
-The flashcards should be concise and capture the key concepts and information from the provided text. Please ensure the questions are clear and the answers are accurate and informative.
-`,
-                    maxTokens: 800,
-                    n: 1,
-                    temperature: 0.5,
-                })
-
-                const flashcardText = response.completions[0].text.trim()
-                const individualFlashcards =
-                    flashcardText.split('\n\nFlashcard ')
-
-                for (let i = 1; i <= numFlashcardsPerParagraph; i++) {
-                    const flashcard = individualFlashcards[i].split('\n')
-                    const question = flashcard[1].replace('Question: ', '')
-                    const answer = flashcard[2].replace('Answer: ', '')
-                    const topic = flashcard[3].replace('Topic: ', '')
-
-                    flashcards.push({
-                        question,
-                        answer,
-                        topic,
-                    })
-                }
-            } catch (error) {
-                console.error('Error generating flashcards:', error)
-            }
-        }
-
-        return flashcards
-    }
-
-    async extractPdfText(doc, pageRange) {
-        const text = []
-
-        for (
-            let pageNum = pageRange.start;
-            pageNum <= (pageRange.end || doc.numPages);
-            pageNum++
-        ) {
-            const page = await doc.getPage(pageNum)
-            const pageText = await page.getTextContent()
-            text.push(...pageText.items.map((item) => item.str))
-        }
-
         return text
+    }
+
+    async generateMCQs(text, numQuestions, options = {}) {
+        const { focusArea, difficultyLevel = 'medium', examples = [] } = options
+
+        const defaultExamples = [
+            'What is the main idea of the first paragraph?',
+            'Which of the following statements is supported by evidence in the passage?',
+            "What is the author's argument in this section?",
+        ]
+
+        const prompt = `This is a passage of text that focuses on ${focusArea || ''}. 
+
+Please generate ${numQuestions} multiple choice questions with answer choices (including the correct answer) based on the information in the passage. 
+
+The questions should be at a ${difficultyLevel} level and focus on testing the reader's understanding of the key concepts. 
+
+${examples.length ? `Here are some examples of what the questions could look like:\n${examples.join('\n')}\n` : defaultExamples.join('\n')}`
+
+        const response = await axios.post(
+            'https://api.openai.com/v1/completions',
+            {
+                engine: 'text-davinci-003',
+                prompt,
+                max_tokens: 1024,
+                n: 1,
+                stop: null,
+                temperature: 0.7,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${this.openaiApiKey}`,
+                },
+            }
+        )
+
+        return this.parseMCQsFromResponse(response.data.choices[0].text)
+    }
+
+    parseMCQsFromResponse(mcqText) {
+        const mcqs = []
+        const lines = mcqText.split('\n\n')
+        for (const line of lines) {
+            if (!line.trim()) continue
+            const parts = line.split('\n')
+            const question = parts[0]
+            const choices = parts.slice(1)
+            mcqs.push({ question, choices })
+        }
+        return mcqs
     }
 }
 
-module.exports = { Claude3Model }
+export default MCQGenerator

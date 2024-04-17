@@ -1,21 +1,23 @@
 import mongoose from 'mongoose'
 
-const flashCardSchema = new mongoose.Schema(
+const quizSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
     },
-    cards: [
+    count: String,
+
+    questions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Card',
+        ref: 'Question',
       },
     ],
   },
   { timestamps: true }
 )
 
-const FlashCard = mongoose.model('FlashCard', flashCardSchema)
+const Quiz = mongoose.model('Quiz', quizSchema)
 
-export default FlashCard
+export default Quiz
