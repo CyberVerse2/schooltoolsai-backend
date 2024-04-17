@@ -1,7 +1,7 @@
 import AppError from '../../common/utils/appError.js'
 import { AppResponse } from '../../common/utils/appResponse.js'
 import { catchAsync } from '../../common/utils/errorHandler.js'
-import { signData} from '../../common/utils/helper.js'
+import { signData } from '../../common/utils/helper.js'
 import { ENVIRONMENT } from '../../common/config/environment.js'
 import { findUser, updateUser } from '../user/user.service.js'
 import { createNewUser, loginUser } from './auth.service.js'
@@ -30,11 +30,7 @@ export const httpSignUp = catchAsync(async (req, res) => {
         password,
         lastLogin: new Date(),
     })
-    const accessToken = signData(
-        { id: newUser.id },
-        ENVIRONMENT.JWT.ACCESS_KEY,
-        ENVIRONMENT.JWT_EXPIRES_IN.ACCESS
-    )
+    const accessToken = signData({ id: newUser.id }, ENVIRONMENT.JWT.ACCESS_KEY)
     // Return success response
     return AppResponse(
         res,

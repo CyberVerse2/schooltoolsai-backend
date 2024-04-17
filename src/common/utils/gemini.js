@@ -96,7 +96,7 @@ class QuizGenerator {
 
         const response = await result.response
         const text = removeBackticks(response.text())?.slice(4) //remove backticks and json
-        console.log(text)
+        console.log(text, 'text')
         return {
             title: pdfTitle === 'No Title Found' ? filename : pdfTitle,
             questions: JSON.parse(text)?.questions,

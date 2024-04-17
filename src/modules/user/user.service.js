@@ -7,7 +7,13 @@ export async function findUser(field, value) {
 
 export async function getQuizzes(userId) {
     const user = await User.findById(userId)
-        .populate('quizzes')
+        .populate({
+            path: 'quizzes',
+            model: 'Quiz',
+            populate: {
+                path: 'questions',
+            },
+        })
         .sort({ createdAt: -1 })
     return user.quizzes
 }

@@ -2,11 +2,10 @@ import { catchAsync } from "../../common/utils/errorHandler.js";
 import { AppResponse } from "../../common/utils/appResponse.js";
 import AppError from "../../common/utils/appError.js";
 import { EntityTransformer } from "../../common/transformers/entityTransformer.js";
-import { updateUser, deleteUser } from "./user.service.js";
+import { updateUser, deleteUser, getQuizzes } from "./user.service.js";
 
 export const httpGetCurrentUser = catchAsync(async (req, res) => {
   const { user } = req;
-  console.log(user)
   return AppResponse(
     res,
     200,
@@ -14,6 +13,14 @@ export const httpGetCurrentUser = catchAsync(async (req, res) => {
     "Current user fetched successfully",
   );
 });
+
+export const httpGetUserQuizzes = catchAsync(async (req, res) => {
+  const { user } = req;
+  const quizzes = await getQuizzes(user.id);
+
+  return AppResponse(res, 200, quizzes, "User quizzes fetched successfully");
+})
+
 
 export const httpUpdateUser = catchAsync(async (req, res) => {
   const { user } = req;

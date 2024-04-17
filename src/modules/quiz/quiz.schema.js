@@ -7,7 +7,7 @@ const quizSchema = new mongoose.Schema(
             required: true,
         },
         count: String,
-
+        score: Number,
         questions: [
             {
                 type: mongoose.Schema.Types.ObjectId,
