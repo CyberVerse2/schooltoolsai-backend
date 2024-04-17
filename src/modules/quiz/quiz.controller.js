@@ -37,7 +37,8 @@ export const httpCreateQuiz = catchAsync(async (req, res) => {
     )
     newQuiz.questions = questionIds
     await newQuiz.save()
-    await updateUser(user.id, { quizzes: [newQuiz] })
+    console.log(user)
+    await updateUser(user.id, { $push: { quizzes: [newQuiz] } })
     const response = await Quiz.findById(newQuiz.id).populate('questions')
 
     return AppResponse(res, 200, response, 'Quiz gotten successfully')

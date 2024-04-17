@@ -6,6 +6,7 @@ import { updateUser, deleteUser } from "./user.service.js";
 
 export const httpGetCurrentUser = catchAsync(async (req, res) => {
   const { user } = req;
+  console.log(user)
   return AppResponse(
     res,
     200,

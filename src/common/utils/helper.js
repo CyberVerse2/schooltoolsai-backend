@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { compare, hash } from "bcrypt";
-import { ENVIRONMENT } from "../config/environment.js";
+// import { ENVIRONMENT } from "../config/environment.js";
 import jwt from "jsonwebtoken";
 // import { ValidationError, validate } from "class-validator";
 // import AppError from "./appError.js";
@@ -37,8 +37,8 @@ export const decodeData = (token, secret) => {
 
 export const setCookie = (res, name, value, options = {}) => {
   res.cookie(name, value, {
-    httpOnly: true,
-    secure: ENVIRONMENT.APP.ENV === "prod",
+    httpOnly: false,
+    secure: true,
     path: "/",
     sameSite: "none",
     ...options,

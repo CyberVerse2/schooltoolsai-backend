@@ -1,24 +1,21 @@
-import { authenticate } from '../utils/authenticate.js';
-import { catchAsync } from '../utils/errorHandler.js';
-import { setCookie } from '../utils/helper.js';
+import jwt from 'jsonwebtoken'
+import { ENVIRONMENT } from '../config/environment.js'
+import { User } from '../../modules/user/user.schema.js'
 
-export const protect = catchAsync(async (req, res, next) => {
-  const { accessToken, refreshToken } =
-    req.cookies ||
-    req.headers['cookie'].split(';').reduce((res, c) => {
-      const [key, val] = c.trim().split('=').map(decodeURIComponent);
-      try {
-        return Object.assign(res, { [key]: JSON.parse(val) });
-      } catch (e) {
-        return Object.assign(res, { [key]: val });
-      }
-    }, {});
-  const { currentUser, newAccessToken } = await authenticate(accessToken, refreshToken);
-  if (newAccessToken) {
-    setCookie(res, 'accessToken', newAccessToken, { maxAge: 15 * 60 * 1000 });
-  }
-  if (currentUser) {
-    req.user = currentUser;
-  }
-  next();
-});
+//JWT AUTH
+export function protect(req, res, next) {
+  const token = req.headers['authorization']?.split(' ')[1]
+  console.log(token)
+    if (!token) {
+        return res.status(403).json({ message: 'Unauthorized' })
+    }
+    jwt.verify(token, ENVIRONMENT.JWT.ACCESS_KEY, async (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: 'Invalid JWT' })
+        }
+      const user = await User.findById(decoded.id)
+      console.log(user)
+        req[`user`] = user
+        next()
+    })
+}
