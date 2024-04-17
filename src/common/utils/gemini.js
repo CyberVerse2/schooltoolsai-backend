@@ -47,10 +47,8 @@ function removeBackticks(text) {
     const trimmedText = text.trim() // Remove leading/trailing whitespace
 
     // Check if the trimmed string starts with "json" followed by a space
-    if (trimmedText.startsWith('json ')) {
-        // Remove "json " (adjust based on your actual pattern)
-        return trimmedText.slice(5)
-    } else if (trimmedText.startsWith('`') && trimmedText.endsWith('`')) {
+
+    if (trimmedText.startsWith('`') && trimmedText.endsWith('`')) {
         // Handle string starting/ending with backticks only (as before)
         return trimmedText.slice(3, -3)
     } else {
@@ -91,8 +89,9 @@ class QuizGenerator {
     Here is the text:
     ${pdfText}
     `
-        const result = await this.model.generateContent(prompt)
+        const result = await this.model.generateContentStream(prompt)
         if (!result || !result.response) {
+            console.log('shege', (await result.response).candidates)
             throw new AppError('Failed to generate quiz content from Google AI')
         }
 
