@@ -13,6 +13,7 @@ async function extractTextFromPDF(pdfData) {
                 console.error(err)
                 reject(err) // Reject the promise on error
             } else if (!item) {
+                console.log('End of file')
                 resolve(extractedText) // Resolve the promise with the extracted text when finished
             } else if (item.text) {
                 extractedText += item.text + ' ' // Append extracted text with newline for readability
