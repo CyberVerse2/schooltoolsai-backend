@@ -15,7 +15,7 @@ export function protect(req, res, next) {
             return res.status(401).json({ message: 'Invalid JWT' })
         }
         const user = await User.findById(decoded.id)
-        console.log(user, 'from protect')
+        if(!user) return res.status(401).json({ message: 'User does not exist' })
         req[`user`] = user
         next()
     })

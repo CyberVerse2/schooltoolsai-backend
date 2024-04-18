@@ -40,7 +40,9 @@ export const httpCreateQuiz = catchAsync(async (req, res) => {
     await newQuiz.save()
     console.log(user)
     await updateUser(user.id, { $push: { quizzes: [newQuiz] } })
-    const response = await Quiz.findById(newQuiz.id).populate('questions').exec()
+    const response = await Quiz.findById(newQuiz.id)
+        .populate('questions')
+        .exec()
 
     return AppResponse(res, 200, response, 'Quiz gotten successfully')
 })
@@ -53,6 +55,7 @@ export const httpGetQuiz = catchAsync(async (req, res) => {
 
 export const httpMarkQuiz = catchAsync(async (req, res) => {
     const { quizId, answers } = req.body
+    console.log(quizId, answers)
     // {
     // questionId: "id of questions",
     // answer: 0
@@ -64,10 +67,12 @@ export const httpMarkQuiz = catchAsync(async (req, res) => {
     const questions = quiz.questions
     let score = 0
     for (let question of questions) {
-        for (let answers of answers) {
-            if (answers.questionId === question.id) {
-                if (answers.answer === question.correctAnswer) {
+        for (let answer of answers) {
+            if (answer.questionId === question.id) {
+                if (answer.answer === question.correctAnswer) {
                     score++
+                } else {
+                    console.log('shege')
                 }
             }
         }
